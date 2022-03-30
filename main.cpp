@@ -5,6 +5,8 @@
     @author Alvin Leung
     @version 1.0 1/21/2022
 */
+#include <cctype>
+#include <ctype.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -13,12 +15,21 @@
 
 using namespace std;
 
-/**
-    Takes in a string representing an assembly command and determines what operator it is. The operator type is returned as an integer
-	code.
-    @param s The assembly command to be read and deciphered
-    @return an int that is code for the assembly command.
-*/
+void printRegisters(HexNum registers[],int len){
+	for(int i = 0; i < len; i++){
+		cout << "r"<<i<<" "<< registers[i].getHexName() << endl;
+	}
+}
+
+int convertStringToInt(string s){
+	string ret;
+	for(int i = 0; i < s.length(); i++){
+		if(isdigit(s.at(i))){
+			 ret+=s.at(i);
+		}
+	}
+	return stoi(ret);
+}
 
 int isAnOperator(string s)
 {
@@ -32,69 +43,87 @@ int isAnOperator(string s)
 	if(s == "ORR") return 7;
 	if(s == "SUB") return 8;
 	if(s == "XOR") return 9;
+	if(s == "MOV") return 10;
 	return 0;
 }
 
 
+
 int main(){
-	//Uses an ifstream to read the file and creates a string word to extract words from the text document
+	int regLength = 8;
+	HexNum registers[regLength];
+	for(int i = 0; i < regLength; i++){
+		HexNum value = HexNum("0x0");
+		registers[i] = value;
+	}
+	printRegisters(registers,regLength);
+	cout << "---" << endl;
 	ifstream file;
-	file.open("Programming-Project-1.txt");
+	file.open("test.txt");
+	//file.open("Programming-Project-1.txt");
+	//8, 7,9
 	string word;
-	//Reads into the file
 	while(file >> word){
-		//When an operator keyword is found inside the text file, the ifstream reads the next two word
-		if(isAnOperator(word) == 1){
-			//The read words are turned into Hex Number Objects with their hex value as parameters
+		string toUpper;
+		if(word.length() > 2 && word.at(0) != '0' && word.at(1) != 'x'){
+			for(int i = 0; i < word.length(); i++){
+				toUpper+=toupper(word.at(i));
+			}
+		}
+		int code = isAnOperator(toUpper);
+		if(code == 1){
 			file >> word;
-			HexNum h1 = HexNum(word);
+			int rd = convertStringToInt(word);			
 			file >> word;
-			HexNum h2 = HexNum(word);
-			//The sum of the two Hex Numbers are found by adding the integer values of the respective Hex Numbers
-			HexNum sum = h1 + h2;
-			//A HexNumber representing the sum is created
-			//A separator is printed out to separate answers
-			cout<< "----" << endl;
-			//The two Hexadecimal numbers are printed out in the equation print with the Hexadecimal Number representing
-			//the sum is printed last
-			cout << h1.getHexName() << " ADD " << h2.getHexName() << " = " << sum.getHexName() << endl;
+			int rn = convertStringToInt(word);
+			file >> word;
+			int rm = convertStringToInt(word);
+			
+			HexNum h1 = registers[rn];
+			HexNum h2 = registers[rm];
+			registers[rd] = HexNum(h1.getInt() + h2.getInt(), h1.getLength());
+			/*cout << registers[rn].getHexName() << " ADD " << h2.getHexName() << " = " << registers[rd].getHexName() << endl;
+
+*/
 			
 		}
-		if(isAnOperator(word) == 2){
-			//The read words are turned into Hex Number Objects with their hex value as parameters
+		if(code == 2){
 			file >> word;
-			HexNum h1 = HexNum(word);
+			int rd = convertStringToInt(word);			
 			file >> word;
-			HexNum h2 = HexNum(word);
-			HexNum AND = HexNum(h1.getInt() & h2.getInt(), h1.getLength());
-			cout << "----" << endl;	
-			cout << h1.getHexName() << " AND " << h2.getHexName() << " = " << AND.getHexName() << endl;
+			int rn = convertStringToInt(word);
+			file >> word;
+			int rm = convertStringToInt(word);
+			
+			HexNum h1 = registers[rn];
+			HexNum h2 = registers[rm];
+			registers[rd] = HexNum(h1.getInt() & h2.getInt(), h1.getLength());
 		}
-		if(isAnOperator(word) == 3){
+		if(code == 3){
 			file >> word;
-			HexNum h1 = HexNum(word);
+			int rd = convertStringToInt(word);
 			file>>word;
-			HexNum ASR = HexNum(h1.getInt()>>1, h1.getLength());
-			cout << "----" << endl;
-			cout << h1.getHexName() << " ASR 1 " << " = " << ASR.getHexName() << endl; 
+			int rn = convertStringToInt(word);
+			HexNum h1 = registers[rn];
+			registers[rd] = HexNum(h1.getInt() >> 1, h1.getLength()); 
 		}
-		if(isAnOperator(word) == 4){
+		if(code == 4){
 			file >> word;
-			HexNum h1 = HexNum(word);
+			int rd = convertStringToInt(word);
 			file>>word;
-			HexNum LSR = HexNum(h1.getInt()>>1, h1.getLength());
-			cout << "----" << endl;
-			cout << h1.getHexName() << " LSR 1 " << " = " << LSR.getHexName() << endl; 
+			int rn = convertStringToInt(word);
+			HexNum h1 = registers[rn];
+			registers[rd] = HexNum(h1.getInt() >> 1, h1.getLength()); 
 		}
-		if(isAnOperator(word) == 5){
+		if(code == 5){
 			file >> word;
-			HexNum h1 = HexNum(word);
+			int rd = convertStringToInt(word);
 			file>>word;
-			HexNum LSL = HexNum(h1.getInt()<<1, h1.getLength());
-			cout << "----" << endl;
-			cout << h1.getHexName() << " LSL 1 " << " = " << LSL.getHexName() << endl; 
+			int rn = convertStringToInt(word);
+			HexNum h1 = registers[rn];
+			registers[rd] = HexNum(h1.getInt() << 1, h1.getLength()); 
 		}
-		if(isAnOperator(word) == 6){
+		if(code == 6){
 			file >> word;
 			HexNum h1 = HexNum(word);
 			file>>word;
@@ -102,39 +131,62 @@ int main(){
 			cout << "----" << endl;
 			cout << h1.getHexName() << " NOT " << " = " << NOT.getHexName() << endl; 			
 		}
-		if(isAnOperator(word) == 7){
-			//The read words are turned into Hex Number Objects with their hex value as parameters
+		if(code == 7){
 			file >> word;
-			HexNum h1 = HexNum(word);
+			int rd = convertStringToInt(word);			
 			file >> word;
-			HexNum h2 = HexNum(word);
-			HexNum ORR = HexNum(h1.getInt() | h2.getInt(), h1.getLength());
-			cout << "----" << endl;	
-			cout << h1.getHexName() << " ORR " << h2.getHexName() << " = " << ORR.getHexName() << endl;
+			int rn = convertStringToInt(word);
+			file >> word;
+			int rm = convertStringToInt(word);
+			
+			HexNum h1 = registers[rn];
+			HexNum h2 = registers[rm];
+			registers[rd] = HexNum(h1.getInt() | h2.getInt(), h1.getLength());
 		}
-		if(isAnOperator(word) == 8){
+		if(code == 8){
 			file >> word;
-			HexNum h1 = HexNum(word);
+			int rd = convertStringToInt(word);			
 			file >> word;
-			HexNum h2 = HexNum(word);
-			HexNum SUB = HexNum(h1.getInt() - h2.getInt(), h1.getLength());
-			cout << "----" << endl;
-			cout << h1.getHexName() << " SUB " << h2.getHexName() << " = " << SUB.getHexName() << endl;
+			int rn = convertStringToInt(word);
+			file >> word;
+			int rm = convertStringToInt(word);
+			
+			HexNum h1 = registers[rn];
+			HexNum h2 = registers[rm];
+			registers[rd] = HexNum(h1.getInt() - h2.getInt(), h1.getLength());
 		}
-		if(isAnOperator(word) == 9){
+		if(code == 9){
 			file >> word;
-			HexNum h1 = HexNum(word);
+			int rd = convertStringToInt(word);			
 			file >> word;
-			HexNum h2 = HexNum(word);
-			HexNum XOR = HexNum(h1.getInt() ^ h2.getInt(), h1.getLength());
-			cout << "----" << endl;
-			cout << h1.getHexName() << " XOR " << h2.getHexName() << " = " << XOR.getHexName() << endl;
+			int rn = convertStringToInt(word);
+			file >> word;
+			int rm = convertStringToInt(word);
+			
+			HexNum h1 = registers[rn];
+			HexNum h2 = registers[rm];
+			registers[rd] = HexNum(h1.getInt() ^ h2.getInt(), h1.getLength());
+		}
+
+		if(code == 10){
+			file >> word;
+			int registerNumber = convertStringToInt(word);
+			file >> word;
+			string imm;
+			for(int i = 1; i < word.length(); i++){
+				imm+=word.at(i);
+			}
+			registers[registerNumber] = HexNum(imm);
 		}
 
 
 			
 	}
+	printRegisters(registers,regLength);
+	cout << "---" << endl;
 	return 0;
+
+
 
 }
 
