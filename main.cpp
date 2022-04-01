@@ -15,6 +15,34 @@
 
 using namespace std;
 
+void printOperator(string operation, int reg1, int reg2, int reg3, string imm, HexNum registers[]){
+	cout << "----------" << endl;
+	cout << "Operation: " << operation << endl;
+	if(imm.length() > 0){
+		cout << "Immediate Operand: " << imm << endl;
+	}
+	if(reg1 != -1){
+		cout << "Operand 1: r" << reg1 << endl;
+	}
+	if(reg2 != -1){
+		cout << "Operand 2: r" << reg2 << endl;
+	}
+	if(reg3 != -1){
+		cout << "Destination: r" << reg3 << endl;
+	}
+	if(reg1 != -1){
+		cout << "r" << reg1 << " " << registers[reg1].getHexName() << endl;
+	}
+	if(reg2 != -1){
+		cout << "r" << reg2 << " " << registers[reg2].getHexName() << endl;
+	}
+	if(reg3 != -1){
+		cout << "r" << reg3 << " " << registers[reg3].getHexName() << endl;
+	}
+	cout << "----------" << endl;
+	
+}
+
 void printRegisters(HexNum registers[],int len){
 	for(int i = 0; i < len; i++){
 		cout << "r"<<i<<" "<< registers[i].getHexName() << endl;
@@ -56,8 +84,6 @@ int main(){
 		HexNum value = HexNum("0x0");
 		registers[i] = value;
 	}
-	printRegisters(registers,regLength);
-	cout << "---" << endl;
 	ifstream file;
 	file.open("test.txt");
 	//file.open("Programming-Project-1.txt");
@@ -70,6 +96,7 @@ int main(){
 				toUpper+=toupper(word.at(i));
 			}
 		}
+//printOperator(string operation, int reg1, int reg2, int reg3, int imm, HexNum registers[])
 		int code = isAnOperator(toUpper);
 		if(code == 1){
 			file >> word;
@@ -82,9 +109,8 @@ int main(){
 			HexNum h1 = registers[rn];
 			HexNum h2 = registers[rm];
 			registers[rd] = HexNum(h1.getInt() + h2.getInt(), h1.getLength());
-			/*cout << registers[rn].getHexName() << " ADD " << h2.getHexName() << " = " << registers[rd].getHexName() << endl;
+			printOperator(toUpper, rn, rm, rd, "", registers);
 
-*/
 			
 		}
 		if(code == 2){
@@ -98,6 +124,7 @@ int main(){
 			HexNum h1 = registers[rn];
 			HexNum h2 = registers[rm];
 			registers[rd] = HexNum(h1.getInt() & h2.getInt(), h1.getLength());
+			printOperator(toUpper, rn, rm, rd, "", registers);
 		}
 		if(code == 3){
 			file >> word;
@@ -105,7 +132,8 @@ int main(){
 			file>>word;
 			int rn = convertStringToInt(word);
 			HexNum h1 = registers[rn];
-			registers[rd] = HexNum(h1.getInt() >> 1, h1.getLength()); 
+			registers[rd] = HexNum(h1.getInt() >> 1, h1.getLength());
+			printOperator(toUpper, rn, -1, rd, "", registers); 
 		}
 		if(code == 4){
 			file >> word;
@@ -113,7 +141,8 @@ int main(){
 			file>>word;
 			int rn = convertStringToInt(word);
 			HexNum h1 = registers[rn];
-			registers[rd] = HexNum(h1.getInt() >> 1, h1.getLength()); 
+			registers[rd] = HexNum(h1.getInt() >> 1, h1.getLength());
+			printOperator(toUpper, rn, -1, rd, "", registers); 
 		}
 		if(code == 5){
 			file >> word;
@@ -122,6 +151,7 @@ int main(){
 			int rn = convertStringToInt(word);
 			HexNum h1 = registers[rn];
 			registers[rd] = HexNum(h1.getInt() << 1, h1.getLength()); 
+			printOperator(toUpper, rn, -1, rd, "", registers);
 		}
 		if(code == 6){
 			file >> word;
@@ -142,6 +172,7 @@ int main(){
 			HexNum h1 = registers[rn];
 			HexNum h2 = registers[rm];
 			registers[rd] = HexNum(h1.getInt() | h2.getInt(), h1.getLength());
+			printOperator(toUpper, rn, rm, rd, "", registers);
 		}
 		if(code == 8){
 			file >> word;
@@ -154,6 +185,7 @@ int main(){
 			HexNum h1 = registers[rn];
 			HexNum h2 = registers[rm];
 			registers[rd] = HexNum(h1.getInt() - h2.getInt(), h1.getLength());
+			printOperator(toUpper, rn, rm, rd, "", registers);
 		}
 		if(code == 9){
 			file >> word;
@@ -166,22 +198,26 @@ int main(){
 			HexNum h1 = registers[rn];
 			HexNum h2 = registers[rm];
 			registers[rd] = HexNum(h1.getInt() ^ h2.getInt(), h1.getLength());
+			printOperator(toUpper, rn, rm, rd, "", registers);
 		}
 
 		if(code == 10){
 			file >> word;
-			int registerNumber = convertStringToInt(word);
+			int rd = convertStringToInt(word);
 			file >> word;
 			string imm;
 			for(int i = 1; i < word.length(); i++){
 				imm+=word.at(i);
 			}
-			registers[registerNumber] = HexNum(imm);
+			registers[rd] = HexNum(imm);
+			printOperator(toUpper, -1, -1, rd, word, registers);
 		}
 
 
 			
 	}
+	cout << "---------" << endl;
+	cout << "Register State End: " << endl;
 	printRegisters(registers,regLength);
 	cout << "---" << endl;
 	return 0;
